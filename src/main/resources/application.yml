@@ -1,0 +1,25 @@
+#spring:
+#  security:
+#    oauth2:
+#      client:
+#        provider:
+#          azure:
+#            issuer-uri: https://login.microsoftonline.com/9cbb4e71-dd48-43a1-991f-379fe7fe47fb/v2.0
+#        registration:
+#          azure-dev:
+#            provider: azure
+#            client-id: e98de15e-5346-4051-8a86-37f0acc6ae7d
+#            client-secret: 30u8Q~M0BOm8ZAc~G_YZS8x4Mlfz-27V_Z6YqaaO
+#            scope:
+#              - openid
+#              - email
+#              - profile
+
+
+app:
+  azure:
+    AD:
+      tenet-id: 9cbb4e71-dd48-43a1-991f-379fe7fe47fb
+      client-id: 4e6e2232-c226-4b6f-9f9f-d379e9e6de6f
+      client-secret: vbK8Q~Yj61QqidCJL3.ZGumymKmz-XWJnCNmeb9Y
+      token-uri: https://login.microsoftonline.com/9cbb4e71-dd48-43a1-991f-379fe7fe47fb/oauth2/v2.0/token
