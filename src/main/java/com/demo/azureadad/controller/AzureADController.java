@@ -2,6 +2,8 @@ package com.demo.azureadad.controller;
 
 import com.demo.azureadad.dto.AzureADLoginResponse;
 import com.demo.azureadad.dto.LoginRequest;
+import com.demo.azureadad.dto.LoginResponse;
+import com.demo.azureadad.dto.UserDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 @RequestMapping("/api/azure")
 @RestController
@@ -36,7 +40,7 @@ public class AzureADController {
     private ObjectMapper objectMapper;
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest loginRequest) {
+    public LoginResponse login(@RequestBody LoginRequest loginRequest) {
         // Prepare request body
         String requestBody = "client_id=" + clientId +
                 "&client_secret=" + clientSecret +
@@ -63,7 +67,9 @@ public class AzureADController {
 
             AzureADLoginResponse azureADLoginResponse = convertStringToObject(response.getBody(), AzureADLoginResponse.class);
             String idToken = azureADLoginResponse.getIdToken();
-            return getUsernameFromToken(idToken);
+            UserDTO userDTO =  getUsernameFromToken(idToken);
+
+            return new LoginResponse("Login successful!", userDTO);
 
         } catch (RestClientException e) {
             e.printStackTrace();
@@ -85,7 +91,7 @@ public class AzureADController {
     }
 
 
-    private String getUsernameFromToken(String idToken) {
+    private UserDTO getUsernameFromToken(String idToken) {
 
         String[] tokenParts = idToken.split("\\.");
 
@@ -100,13 +106,28 @@ public class AzureADController {
         try {
             JsonNode jsonNode = objectMapper.readTree(decodedPayload);
 
-            String userName = jsonNode.get("upn").asText();
+            UserDTO userDTO= new UserDTO();
 
-            return userName;
+            userDTO.setUsername(jsonNode.get("upn").asText());
+            userDTO.setFirstName(jsonNode.get("given_name").asText());
+            userDTO.setLastName(jsonNode.get("family_name").asText());
+            userDTO.setGroups(convertToList(jsonNode.get("groups")));
+
+            return userDTO;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private List<String> convertToList(JsonNode node) {
+        List<String> list = new ArrayList<>();
+        if (node.isArray()) {
+            for (JsonNode jsonNode : node) {
+                list.add(jsonNode.asText());
+            }
+        }
+        return list;
     }
 
 }
